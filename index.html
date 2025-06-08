@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>GPT 채팅</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f4f4f4;
+    }
+    #chat {
+      max-width: 600px;
+      margin: auto;
+    }
+    .msg {
+      margin: 10px 0;
+      white-space: pre-wrap;
+    }
+    .user {
+      color: blue;
+    }
+    .gpt {
+      color: green;
+    }
+    #messages {
+      border: 1px solid #ccc;
+      padding: 10px;
+      height: 300px;
+      overflow-y: auto;
+      background: white;
+    }
+    #input {
+      width: 70%;
+    }
+    #send {
+      width: 28%;
+    }
+  </style>
+</head>
+<body>
+  <div id="chat">
+    <h2>GPT와 대화해보세요</h2>
+    <div id="messages"></div>
+    <input id="input" placeholder="메시지를 입력하세요..." />
+    <button id="send" onclick="send()">보내기</button>
+  </div>
+
+  <script>
+    const API_KEY = "sk-여기에_실제_API_키"; // ← 실제 키 넣기
+    const messagesDiv = document.getElementById("messages");
+    const input = document.getElementById("input");
+    const messageHistory = [
+      { role: "system", content: "너는 친절한 한국어 대화 상대야." }
+    ];
+
+    async function send() {
+      const text = input.value.trim();
+      if (!text) return;
+
+      // 사용자 메시지 화면에 출력
+      messagesDiv.innerHTML += `<div class="msg user">🙋 사용자: ${text}</div>`;
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+      messageHistory.push({ role: "user", content: text });
+      input.value = "";
+
+      try {
+        const res = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${API_KEY}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model: "gpt-3.5-turbo",
+            messages: messageHistory
+          })
+        });
+
+        const data = await res.json();
+        const reply = data.choices?.[0]?.message?.content ?? "GPT 응답 오류";
+
+        messagesDiv.innerHTML += `<div class="msg gpt">🤖 GPT: ${reply}</div>`;
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        messageHistory.push({ role: "assistant", content: reply });
+      } catch (e) {
+        messagesDiv.innerHTML += `<div class="msg gpt">❌ 오류: ${e.message}</div>`;
+      }
+    }
+  </script>
+</body>
+</html>
