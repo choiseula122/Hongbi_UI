@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>GPT 채팅</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
+    #chat { max-width: 600px; margin: auto; }
+    .msg { margin: 10px 0; }
+    .user { color: blue; }
+    .gpt { color: green; }
+  </style>
+</head>
+<body>
+  <div id="chat">
+    <h2>GPT와 대화해보세요</h2>
+    <div id="messages"></div>
+    <input id="input" placeholder="메시지를 입력하세요..." />
+    <button onclick="send()">보내기</button>
+  </div>
+
+  <script>
+    const API_KEY = "sk-..."; // OpenAI 키 직접 입력
+    const user = new URLSearchParams(window.location.search).get("user") || "사용자";
+
+    async function send() {
+      const input = document.getElementById("input");
+      const text = input.value;
+      if (!text) return;
+
+      const messagesDiv = document.getElementById("messages");
+      messagesDiv.innerHTML += `<div class="msg user">${user}: ${text}</div>`;
+      input.value = "";
+
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [
+            { role: "system", content: "넌 ZEP 세계의 친절한 NPC야." },
+            { role: "user", content: text }
+          ]
+        })
+      });
+
+      const data = await res.json();
+      const reply = data.choices?.[0]?.message?.content ?? "답변 오류";
+      messagesDiv.innerHTML += `<div class="msg gpt">GPT: ${reply}</div>`;
+    }
+  </script>
+</body>
+</html>
