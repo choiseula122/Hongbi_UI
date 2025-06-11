@@ -3,7 +3,7 @@ const userInput = document.querySelector('#user-input input');
 const sendButton = document.querySelector('#user-input button');
 
 // ✅ 반드시 /chat 포함!
-const apiEndpoint = 'http://localhost:3000/chat';
+const apiEndpoint = 'https://hongbi-ui.onrender.com';
 
 function addMessage(sender, message) {
     const messageElement = document.createElement('div');
